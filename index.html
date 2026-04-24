@@ -9,7 +9,7 @@
   </head>
   <body class="bg-stone-200 relative">
     <div
-      class="flex justify-between p-2 shadow items-center bg-white z-10 relative"
+      class="flex justify-between p-2 shadow items-center bg-white z-10 relat ive"
     >
       <h1>Lazy List</h1>
       <div
@@ -25,20 +25,52 @@
       </div>
     </div>
 
-    <div class="hidden fixed bg-stone-600 h-full w-full z-20 " id="login-form">
+    <div class="hidden fixed bg-stone-600 h-full w-full z-20" id="login-form">
       <div class="w-full h-full flex justify-center items-center" id="out-box">
-        <div class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white">
+        <div
+          class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white"
+        >
           <h2 class="text-sm">Login</h2>
           <input
             id="username"
             placeholder="Masukkan username"
-            class="border border-stone-200 rounded-sm px-2 py-1 " 
+            class="border border-stone-200 rounded-sm px-2 py-1"
           />
           <button
             id="btnLogin"
             class="bg-blue-600 text-white px-2 py-1 rounded-sm hover:bg-blue-800 hover:cursor-pointer"
           >
             Login cuy
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fixed bg-stone-600 h-full w-full z-20" id="create-form">
+      <div class="w-full h-full flex justify-center items-center" id="out-box">
+        <div
+          class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white"
+        >
+          <h2 class="text-sm text-center">only atmin</h2>
+          <label for="create-username">username</label>
+          <input
+            id="create-username"
+            name="create-username"
+            placeholder="Masukkan username"
+            class="border border-stone-200 rounded-sm px-2 py-1"
+          />
+          <label for="create-name">name</label>
+          <input
+            id="create-name"
+            name="create-name"
+            placeholder="Masukkan username"
+            class="border border-stone-200 rounded-sm px-2 py-1"
+          />
+          <button
+            id="btnSubmit"
+            class="bg-blue-600 text-white px-2 py-1 rounded-sm hover:bg-blue-800 hover:cursor-pointer"
+          >
+            add
           </button>
         </div>
       </div>

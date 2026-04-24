@@ -1,1 +1,23 @@
 @import "tailwindcss";
+@font-face {
+  font-family: Poppins;
+  src: url("./assets/Poppins-Regular.ttf");
+  font-style: normal;
+  font-weight: 400;
+}
+
+* {
+  font-family: Poppins, sans-serif !important;
+}
+.error-input {
+  border: 1px solid red !important;
+}
+
+#btnLogin:disabled {
+  cursor: not-allowed;
+  opacity: 0.2;
+}
+
+#btnLogin:disabled:hover {
+  background-color: #155dfc;
+}

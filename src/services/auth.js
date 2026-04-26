@@ -1,5 +1,12 @@
 import { db } from "../config/firebase";
-import { collection, getDocs, query, where, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  query,
+  where,
+  doc,
+  getDoc,
+} from "firebase/firestore";
 
 export async function loginByUsername(username) {
   const q = query(collection(db, "users"), where("username", "==", username));
@@ -18,11 +25,12 @@ export async function loginByUsername(username) {
   return user;
 }
 
-export async function isAdmin(id) {
-  const docRef = doc(db, "users", id);
-  const snapshot = await getDoc(docRef);
+export async function isAdmin() {
+  const raw = localStorage.getItem("user");
+  if (!raw) return false;
 
-  if (!snapshot.exists()) return false;
+  const { id } = JSON.parse(raw);
 
-  return snapshot.data().isAdmin === true;
+  const snapshot = await getDoc(doc(db, "users", id));
+  return snapshot.exists() && snapshot.data().isAdmin === true;
 }

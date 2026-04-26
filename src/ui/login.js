@@ -1,5 +1,5 @@
 import { loginByUsername } from "../services/auth";
-import { initUser, isHidden } from "../utils/utils";
+import { hideLoader, initUser, isHidden } from "../utils/utils";
 import Swal from "sweetalert2";
 import { validateError } from "../utils/utils";
 
@@ -27,6 +27,7 @@ async function handleLogin() {
   const hasError = validateError(username);
 
   try {
+    hideLoader(false)
     btnLogin.disabled = true;
 
     if (hasError) return;
@@ -69,5 +70,6 @@ async function handleLogin() {
     console.log(error);
   } finally {
     btnLogin.disabled = false;
+    hideLoader(true)
   }
 }

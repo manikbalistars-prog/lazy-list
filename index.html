@@ -9,11 +9,16 @@
   </head>
   <body class="bg-stone-200 relative">
     <div
-      class="flex justify-between p-2 shadow items-center bg-white z-10 relat ive"
+      class="flex justify-between p-2 shadow items-center bg-white z-10 fixed w-full"
     >
       <div class="flex gap-2 items-center justify-center">
         <h1>Lazy List</h1>
-        <button class="bg-blue-400 px-2 py-0.5 rounded-full text-sm text-white hover:cursor-pointer hover:bg-blue-600" id="add-btn">add</button>
+        <button
+          class="bg-blue-400 px-2 py-0.5 rounded-full text-sm text-white hover:cursor-pointer hover:bg-blue-600"
+          id="add-btn"
+        >
+          add
+        </button>
       </div>
       <div
         class="flex gap-2 items-center justify-center hover:cursor-pointer hover:bg-stone-300 p-2 rounded-xl"
@@ -28,7 +33,10 @@
       </div>
     </div>
 
-    <div class="hidden fixed bg-stone-600 h-full w-full z-20" id="login-form">
+    <div
+      class="hidden fixed bg-stone-950/30 h-full w-full z-20"
+      id="login-form"
+    >
       <div class="w-full h-full flex justify-center items-center" id="out-box">
         <div
           class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white"
@@ -49,7 +57,10 @@
       </div>
     </div>
 
-    <div class="hidden fixed bg-stone-600 h-full w-full z-20" id="create-form">
+    <div
+      class="hidden fixed bg-stone-950/30 h-full w-full z-20"
+      id="create-form"
+    >
       <div class="w-full h-full flex justify-center items-center" id="out-box">
         <div
           class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white"
@@ -77,6 +88,10 @@
           </button>
         </div>
       </div>
+    </div>
+
+    <div class="bg-stone-950/35 w-screen h-screen z-90 relative flex justify-center items-center " id="loader">
+      <span class="loader"></span>
     </div>
 
     <script src="/main.js" type="module"></script>

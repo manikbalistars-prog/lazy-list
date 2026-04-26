@@ -1,5 +1,5 @@
 import { isAdmin } from "../services/auth";
-import { isHidden } from "../utils/utils";
+import { hideLoader, isHidden } from "../utils/utils";
 import { createUser, isAlreadyRegistered } from "../services/users";
 import Swal from "sweetalert2";
 const createForm = document.getElementById("create-form");
@@ -22,36 +22,56 @@ export function initCreateUser() {
 }
 
 async function handleOpenForm() {
-  const raw = localStorage.getItem("user");
-  if (!raw) return;
+  try {
+    hideLoader(false);
+    if (!(await isAdmin())) {
+      Swal.fire({
+        title: "Authentication Failed!",
+        text: `only atmin lol`,
+        icon: "warning",
+      });
 
-  const user = JSON.parse(raw);
+      return;
+    }
 
-  const checkAdmin = await isAdmin(user.id);
-
-  if (!checkAdmin) {
-    return;
+    isHidden(createForm, false);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    hideLoader(true);
   }
-
-  isHidden(createForm, false);
 }
 
 async function createUserHandler() {
-  const check = await isAlreadyRegistered(usernameInput.value);
-  if (check) {
+  try {
+    hideLoader(false);
+    const check = await isAlreadyRegistered(usernameInput.value);
+    if (check) {
+      Swal.fire({
+        title: "Username has been taken!",
+        text: `change it lol`,
+        icon: "warning",
+      });
+
+      return;
+    }
+    const body = {
+      name: nameInput.value,
+      username: usernameInput.value,
+    };
+
+    const create = await createUser(body);
     Swal.fire({
-      title: "Username has been taken!",
-      text: `change it lol`,
-      icon: "warning",
+      title: "Succes!",
+      text: "user added",
+      timer: 2000,
+      timerProgressBar: true,
+      icon: "success",
     });
-
-    return;
+    isHidden(createForm, true);
+  } catch (error) {
+    console.log(error);
+  } finally {
+    hideLoader(true);
   }
-  const body = {
-    name: nameInput.value,
-    username: usernameInput.value,
-  };
-  const create = await createUser(body);
-
-  console.log(create);
 }

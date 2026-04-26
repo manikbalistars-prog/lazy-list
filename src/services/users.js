@@ -24,3 +24,12 @@ export async function isAlreadyRegistered(username) {
   const snapshot = await getDocs(q);
   return !snapshot.empty;
 }
+
+export async function loadUser() {
+  const snapshot = await getDocs(collection(db, "users"));
+
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
+}

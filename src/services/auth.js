@@ -34,3 +34,34 @@ export async function isAdmin() {
   const snapshot = await getDoc(doc(db, "users", id));
   return snapshot.exists() && snapshot.data().isAdmin === true;
 }
+
+
+export async function isValidUser() {
+  const raw = localStorage.getItem("user");
+  if (!raw) return false;
+
+  try {
+    const { id } = JSON.parse(raw);
+    const snapshot = await getDoc(doc(db, "users", id));
+
+    return snapshot.exists(); 
+  } catch {
+    return false;
+  }
+}
+
+export async function validateUser() {
+  const raw = localStorage.getItem("user");
+  if (!raw) return null;
+
+  try {
+    const { id } = JSON.parse(raw);
+    const snap = await getDoc(doc(db, "users", id));
+
+    if (!snap.exists()) return null;
+
+    return { id, ...snap.data() };
+  } catch {
+    return null;
+  }
+}

@@ -76,3 +76,9 @@
   100% { transform: rotate(360deg) }
 }
  
+
+.fc .fc-daygrid-event {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+}

@@ -4,23 +4,13 @@ import { initLogin } from "./src/ui/login";
 import { createIcons, icons } from "lucide";
 import { hideLoader, initUser, isHidden, removeError } from "./src/utils/utils";
 import { initCreateUser } from "./src/ui/create";
+import { loadUser } from "./src/services/users";
+import { initCalendar, renderUsers } from "./src/utils/render";
 
 const users = [];
 const loginForm = document.getElementById("login-form");
 const createForm = document.getElementById("create-form");
 const usernameForm = document.getElementById("username");
-
-async function testDB() {
-  const snapshot = await getDocs(collection(db, "users"));
-
-  snapshot.forEach((doc) => {
-    users.push({
-      id: doc.id,
-      ...doc.data(),
-    });
-  });
-  console.log(users);
-}
 
 removeError(usernameForm);
 
@@ -30,9 +20,13 @@ export async function init() {
   hideLoader(true);
   initLogin();
   initCreateUser();
-  testDB();
   createIcons({ icons });
   initUser();
+  renderUsers();
+  const cal = await initCalendar();
+  if (cal) {
+    renderUsers();
+  }
 }
 
 init();

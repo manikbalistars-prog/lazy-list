@@ -1,3 +1,5 @@
+
+
 const userDiv = document.getElementById("user");
 
 export function initUser() {
@@ -35,7 +37,9 @@ export function removeError(input) {
   });
 }
 
-export function hideLoader(status){
+export function hideLoader(status) {
   const myloader = document.getElementById("loader");
   myloader.classList.toggle("hidden", status);
 }
+
+

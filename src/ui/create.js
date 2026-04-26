@@ -45,7 +45,17 @@ async function handleOpenForm() {
 async function createUserHandler() {
   try {
     hideLoader(false);
+    if (!(await isAdmin())) {
+      Swal.fire({
+        title: "Authentication Failed!",
+        text: `only atmin lol`,
+        icon: "warning",
+      });
+
+      return;
+    }
     const check = await isAlreadyRegistered(usernameInput.value);
+
     if (check) {
       Swal.fire({
         title: "Username has been taken!",

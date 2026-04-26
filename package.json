@@ -14,6 +14,7 @@
   "dependencies": {
     "@tailwindcss/vite": "^4.2.4",
     "firebase": "^12.12.1",
+    "fullcalendar": "^6.1.20",
     "lucide": "^1.9.0",
     "sweetalert2": "^11.26.24",
     "tailwindcss": "^4.2.4"

@@ -36,7 +36,11 @@ export async function isAdmin() {
 }
 
 
+let cachedValid = null;
+
 export async function isValidUser() {
+  if (cachedValid !== null) return cachedValid;
+
   const raw = localStorage.getItem("user");
   if (!raw) return false;
 
@@ -44,13 +48,18 @@ export async function isValidUser() {
     const { id } = JSON.parse(raw);
     const snapshot = await getDoc(doc(db, "users", id));
 
-    return snapshot.exists(); 
+    cachedValid = snapshot.exists();
+    return cachedValid;
   } catch {
     return false;
   }
 }
 
+let cachedUser = null;
+
 export async function validateUser() {
+  if (cachedUser) return cachedUser;
+
   const raw = localStorage.getItem("user");
   if (!raw) return null;
 
@@ -60,7 +69,8 @@ export async function validateUser() {
 
     if (!snap.exists()) return null;
 
-    return { id, ...snap.data() };
+    cachedUser = { id, ...snap.data() };
+    return cachedUser;
   } catch {
     return null;
   }

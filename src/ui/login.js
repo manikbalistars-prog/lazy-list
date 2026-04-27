@@ -3,7 +3,6 @@ import { hideLoader, initUser, isHidden } from "../utils/utils";
 import Swal from "sweetalert2";
 import { validateError } from "../utils/utils";
 
-
 const usrBtn = document.getElementById("user-btn");
 const loginForm = document.getElementById("login-form");
 const btnLogin = document.getElementById("btnLogin");
@@ -27,7 +26,7 @@ async function handleLogin() {
   const hasError = validateError(username);
 
   try {
-    hideLoader(false)
+    hideLoader(false);
     btnLogin.disabled = true;
 
     if (hasError) return;
@@ -62,14 +61,13 @@ async function handleLogin() {
     });
 
     initUser();
-
-  
-   
-
+    setTimeout(() => {
+      window.location.reload();
+    }, 1000);
   } catch (error) {
     console.log(error);
   } finally {
     btnLogin.disabled = false;
-    hideLoader(true)
+    hideLoader(true);
   }
 }

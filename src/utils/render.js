@@ -30,6 +30,9 @@ export async function initCalendar() {
     height: "auto",
     contentHeight: "auto",
     dayMaxEvents: 2,
+    longPressDelay: 200,
+    eventLongPressDelay: 200,
+    selectLongPressDelay: 200,
 
     headerToolbar: {
       start: "",
@@ -45,7 +48,7 @@ export async function initCalendar() {
 
       return {
         html: `
-          <div class="flex justify-between items-center px-1.5 rounded-sm text-white w-full ${
+          <div class="flex justify-between items-center px-1.5 py-2 rounded-sm text-white w-full ${
             isHalf ? "bg-yellow-600" : "bg-blue-600"
           } ">
             ${name}
@@ -98,8 +101,20 @@ export async function initCalendar() {
       if (!valid) return;
 
       const rect = calendarEl.getBoundingClientRect();
-      const x = info.jsEvent.clientX;
-      const y = info.jsEvent.clientY;
+      const e = info.jsEvent;
+
+      let x, y;
+
+      if (e.touches && e.touches.length > 0) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        x = e.changedTouches[0].clientX;
+        y = e.changedTouches[0].clientY;
+      } else {
+        x = e.clientX;
+        y = e.clientY;
+      }
 
       const isOutside =
         x < rect.left || x > rect.right || y < rect.top || y > rect.bottom;
@@ -192,7 +207,7 @@ export async function renderUsers() {
     .map(
       (user) => `
     <div 
-      class="px-2 bg-blue-600 rounded-sm text-white cursor-pointer"
+      class="px-5 py-3 bg-blue-600 rounded-sm text-white cursor-pointer"
       data-id="${user.id}"
     >
       ${user.name}
@@ -204,6 +219,7 @@ export async function renderUsers() {
   if (!draggableInstance) {
     draggableInstance = new Draggable(userListEl, {
       itemSelector: "[data-id]",
+      longPressDelay: 200,
       eventData: function (el) {
         return {
           title: el.innerText,

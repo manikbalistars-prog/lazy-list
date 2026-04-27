@@ -23,10 +23,7 @@ export async function init() {
   createIcons({ icons });
   initUser();
   renderUsers();
-  const cal = await initCalendar();
-  if (cal) {
-    renderUsers();
-  }
+ const cal = await initCalendar();
 }
 
 init();

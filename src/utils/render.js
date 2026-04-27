@@ -12,11 +12,10 @@ import { loadUser } from "../services/users";
 
 const calendarEl = document.getElementById("calendarEl");
 const userListEl = document.getElementById("userList");
-
-let calendarInstance = null; 
+let isDeleting = false;
+let calendarInstance = null;
 
 export async function initCalendar() {
-
   if (calendarInstance) return calendarInstance;
 
   const valid = await isValidUser();
@@ -65,15 +64,14 @@ export async function initCalendar() {
       try {
         const event = info.event;
 
-        const newId = await createOffDay({
+        await createOffDay({
           userId: event.extendedProps.userId,
           name: event.title,
           date: event.startStr,
           isHalf: false,
         });
 
-        event.setProp("id", newId);
-        event.setExtendedProp("isHalf", false);
+        info.event.remove();
       } catch (err) {
         console.error(err);
         info.event.remove();
@@ -81,7 +79,7 @@ export async function initCalendar() {
     },
 
     eventDrop: async function (info) {
-      if (!valid) {
+      if (!valid || isDeleting) {
         info.revert();
         return;
       }
@@ -107,11 +105,15 @@ export async function initCalendar() {
         x < rect.left || x > rect.right || y < rect.top || y > rect.bottom;
 
       if (isOutside) {
+        isDeleting = true;
+
         try {
           await deleteOffDay(info.event.id);
           info.event.remove();
         } catch (err) {
           console.error(err);
+        } finally {
+          isDeleting = false;
         }
       }
     },
@@ -137,7 +139,10 @@ export async function initCalendar() {
   });
 
   calendarInstance.render();
-
+  let unsubscribeOffDay = null;
+  if (unsubscribeOffDay) {
+    unsubscribeOffDay();
+  }
 
   subscribeOffDay((raw) => {
     if (!calendarInstance) return;
@@ -164,11 +169,11 @@ export async function initCalendar() {
 
 export async function renderUsers() {
   const admin = await isAdmin();
-
+  let draggableInstance = null;
   let users = [];
 
   if (admin) {
-    users = await loadUser(); 
+    users = await loadUser();
   } else {
     const raw = localStorage.getItem("user");
     if (!raw) return;
@@ -180,7 +185,7 @@ export async function renderUsers() {
         id: user.id,
         name: user.name,
       },
-    ]; 
+    ];
   }
 
   userListEl.innerHTML = users
@@ -192,20 +197,22 @@ export async function renderUsers() {
     >
       ${user.name}
     </div>
-  `,
+  `
     )
     .join("");
 
-  new Draggable(userListEl, {
-    itemSelector: "[data-id]",
-    eventData: function (el) {
-      return {
-        title: el.innerText,
-        extendedProps: {
-          userId: el.dataset.id,
-          isHalf: false,
-        },
-      };
-    },
-  });
+  if (!draggableInstance) {
+    draggableInstance = new Draggable(userListEl, {
+      itemSelector: "[data-id]",
+      eventData: function (el) {
+        return {
+          title: el.innerText,
+          extendedProps: {
+            userId: el.dataset.id,
+            isHalf: false,
+          },
+        };
+      },
+    });
+  }
 }

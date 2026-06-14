@@ -12,7 +12,7 @@ import { loadUser } from "../services/users";
 
 const calendarEl = document.getElementById("calendarEl");
 const userListEl = document.getElementById("userList");
-
+let isDeleting = false;
 let calendarInstance = null;
 
 export async function initCalendar() {
@@ -30,6 +30,9 @@ export async function initCalendar() {
     height: "auto",
     contentHeight: "auto",
     dayMaxEvents: 2,
+    longPressDelay: 200,
+    eventLongPressDelay: 200,
+    selectLongPressDelay: 200,
 
     headerToolbar: {
       start: "",
@@ -71,15 +74,14 @@ export async function initCalendar() {
       try {
         const event = info.event;
 
-        const newId = await createOffDay({
+        await createOffDay({
           userId: event.extendedProps.userId,
           name: event.title,
           date: event.startStr,
           isHalf: false,
         });
 
-        event.setProp("id", newId);
-        event.setExtendedProp("isHalf", false);
+        info.event.remove();
       } catch (err) {
         console.error(err);
         info.event.remove();
@@ -87,7 +89,7 @@ export async function initCalendar() {
     },
 
     eventDrop: async function (info) {
-      if (!valid) {
+      if (!valid || isDeleting) {
         info.revert();
         return;
       }
@@ -106,18 +108,34 @@ export async function initCalendar() {
       if (!valid) return;
 
       const rect = calendarEl.getBoundingClientRect();
-      const x = info.jsEvent.clientX;
-      const y = info.jsEvent.clientY;
+      const e = info.jsEvent;
+
+      let x, y;
+
+      if (e.touches && e.touches.length > 0) {
+        x = e.touches[0].clientX;
+        y = e.touches[0].clientY;
+      } else if (e.changedTouches && e.changedTouches.length > 0) {
+        x = e.changedTouches[0].clientX;
+        y = e.changedTouches[0].clientY;
+      } else {
+        x = e.clientX;
+        y = e.clientY;
+      }
 
       const isOutside =
         x < rect.left || x > rect.right || y < rect.top || y > rect.bottom;
 
       if (isOutside) {
+        isDeleting = true;
+
         try {
           await deleteOffDay(info.event.id);
           info.event.remove();
         } catch (err) {
           console.error(err);
+        } finally {
+          isDeleting = false;
         }
       }
     },
@@ -143,6 +161,10 @@ export async function initCalendar() {
   });
 
   calendarInstance.render();
+  let unsubscribeOffDay = null;
+  if (unsubscribeOffDay) {
+    unsubscribeOffDay();
+  }
 
   subscribeOffDay((raw) => {
     if (!calendarInstance) return;
@@ -169,7 +191,7 @@ export async function initCalendar() {
 
 export async function renderUsers() {
   const admin = await isAdmin();
-
+  let draggableInstance = null;
   let users = [];
 
   if (admin) {
@@ -192,25 +214,28 @@ export async function renderUsers() {
     .map(
       (user) => `
     <div 
-      class="px-2 bg-blue-600 rounded-sm text-white cursor-pointer"
+      class="px-5 py-3 bg-blue-600 rounded-sm text-white cursor-pointer"
       data-id="${user.id}"
     >
       ${user.name}
     </div>
-  `,
+  `
     )
     .join("");
 
-  new Draggable(userListEl, {
-    itemSelector: "[data-id]",
-    eventData: function (el) {
-      return {
-        title: el.innerText,
-        extendedProps: {
-          userId: el.dataset.id,
-          isHalf: false,
-        },
-      };
-    },
-  });
+  if (!draggableInstance) {
+    draggableInstance = new Draggable(userListEl, {
+      itemSelector: "[data-id]",
+      longPressDelay: 200,
+      eventData: function (el) {
+        return {
+          title: el.innerText,
+          extendedProps: {
+            userId: el.dataset.id,
+            isHalf: false,
+          },
+        };
+      },
+    });
+  }
 }

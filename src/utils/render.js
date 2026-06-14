@@ -45,16 +45,23 @@ export async function initCalendar() {
     eventContent: function (arg) {
       const isHalf = arg.event.extendedProps.isHalf;
       const name = arg.event.title;
+      let bgClass;
+
+      if (isHalf) {
+        bgClass = "bg-yellow-600";
+      } else if (name === "DAY OFF") {
+        bgClass = "bg-red-600";
+      } else {
+        bgClass = "bg-blue-600";
+      }
 
       return {
         html: `
-          <div class="flex justify-between items-center px-1.5 py-2 rounded-sm text-white w-full ${
-            isHalf ? "bg-yellow-600" : "bg-blue-600"
-          } ">
-            ${name}
-            ${isHalf ? '<span class="text-xs opacity-70">½</span>' : ""}
-          </div>
-        `,
+  <div class="flex justify-between items-center px-1.5 rounded-sm text-white w-full ${bgClass}">
+    ${name}
+    ${isHalf ? '<span class="text-xs opacity-70">½</span>' : ""}
+  </div>
+`,
       };
     },
 

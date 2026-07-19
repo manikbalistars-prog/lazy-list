@@ -5,7 +5,7 @@ import { createIcons, icons } from "lucide";
 import { hideLoader, initUser, isHidden, removeError } from "./src/utils/utils";
 import { initCreateUser } from "./src/ui/create";
 import { loadUser } from "./src/services/users";
-import { initCalendar, renderUsers } from "./src/utils/render";
+import { initCalendar, initGuestSearch, renderUsers } from "./src/utils/render";
 
 const users = [];
 const loginForm = document.getElementById("login-form");
@@ -23,7 +23,8 @@ export async function init() {
   createIcons({ icons });
   initUser();
   renderUsers();
- const cal = await initCalendar();
+  const cal = await initCalendar();
+  await initGuestSearch();
 }
 
 init();

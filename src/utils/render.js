@@ -199,7 +199,7 @@ export async function initCalendar() {
       let bgClass;
 
       if (isHalf) {
-        bgClass = "bg-blue-600";
+        bgClass = "bg-yellow-600";
       } else if (name === "DAY OFF") {
         bgClass = "bg-red-600";
       } else {

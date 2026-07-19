@@ -226,7 +226,6 @@ export async function initCalendar() {
         const event = info.event;
 
         await createOffDay({
-          userId: event.extendedProps.userId,
           name: event.title,
           date: event.startStr,
           isHalf: false,
@@ -363,6 +362,7 @@ export async function renderUsers() {
     <div 
       class="px-5 py-3 bg-green-600 rounded-sm text-white cursor-pointer"
       data-id="${user.id}"
+      data-name="${user.name || ""}"
     > ${user.userId}
       ${user.name}
     </div>
@@ -376,7 +376,7 @@ export async function renderUsers() {
       longPressDelay: 200,
       eventData: function (el) {
         return {
-          title: el.innerText,
+          title: el.dataset.name || el.innerText,
           extendedProps: {
             userId: el.dataset.id,
             isHalf: false,

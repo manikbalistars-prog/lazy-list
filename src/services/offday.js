@@ -22,7 +22,7 @@ export function subscribeOffDay(callback) {
   });
 }
 
-export async function createOffDay({ userId, name, date, isHalf }) {
+export async function createOffDay({ name, date, isHalf, userId }) {
   const user = await validateUser();
 
   if (!user) {
@@ -30,14 +30,19 @@ export async function createOffDay({ userId, name, date, isHalf }) {
   }
 
   try {
-    const docRef = await addDoc(collection(db, "data"), {
-      userId,
+    const payload = {
       name,
       date,
       isHalf,
       allDay: !isHalf,
       createdAt: new Date(),
-    });
+    };
+
+    if (userId != null && userId !== "") {
+      payload.userId = userId;
+    }
+
+    const docRef = await addDoc(collection(db, "data"), payload);
 
     return docRef.id;
   } catch (error) {

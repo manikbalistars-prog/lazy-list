@@ -8,26 +8,21 @@
     <link rel="stylesheet" href="./src/style.css" />
   </head>
   <body class="bg-stone-200 relative">
-
-     <div
-      class="flex justify-between p-2 shadow items-center bg-white z-10 fixed w-full top-0"
-    >
+    <div
+      class="flex justify-between p-2 shadow items-center bg-white z-10 fixed w-full top-0">
       <div class="flex gap-2 items-center justify-center">
         <h1>Lazy List</h1>
         <button
           class="bg-blue-400 px-2 py-0.5 rounded-full text-sm text-white hover:cursor-pointer hover:bg-blue-600"
-          id="add-btn"
-        >
+          id="add-btn">
           add
         </button>
       </div>
       <div
         class="flex gap-2 items-center justify-center hover:cursor-pointer hover:bg-stone-300 p-2 rounded-xl"
-        id="user-btn"
-      >
+        id="user-btn">
         <div
-          class="flex items-center justify-center bg-stone-400 rounded-full p-1"
-        >
+          class="flex items-center justify-center bg-stone-400 rounded-full p-1">
           <i data-lucide="user" class="h-5 w-5"></i>
         </div>
         <div class="text-sm" id="user">Login</div>
@@ -37,22 +32,18 @@
 
     <div
       class="hidden fixed bg-stone-950/30 h-full w-full z-80 top-0"
-      id="login-form"
-    >
+      id="login-form">
       <div class="w-full h-full flex justify-center items-center" id="out-box">
         <div
-          class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white"
-        >
+          class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white">
           <h2 class="text-sm">Login</h2>
           <input
             id="username"
             placeholder="Masukkan username"
-            class="border border-stone-200 rounded-sm px-2 py-1"
-          />
+            class="border border-stone-200 rounded-sm px-2 py-1" />
           <button
             id="btnLogin"
-            class="bg-blue-600 text-white px-2 py-1 rounded-sm hover:bg-blue-800 hover:cursor-pointer"
-          >
+            class="bg-blue-600 text-white px-2 py-1 rounded-sm hover:bg-blue-800 hover:cursor-pointer">
             Login cuy
           </button>
         </div>
@@ -61,31 +52,26 @@
 
     <div
       class="hidden fixed bg-stone-950/30 h-full w-full z-80 top-0"
-      id="create-form"
-    >
+      id="create-form">
       <div class="w-full h-full flex justify-center items-center" id="out-box">
         <div
-          class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white"
-        >
+          class="flex flex-col gap-2 p-2 w-full md:w-xl mx-5 rounded-xl bg-white">
           <h2 class="text-sm text-center">only atmin</h2>
           <label for="create-username">username</label>
           <input
             id="create-username"
             name="create-username"
             placeholder="Masukkan username"
-            class="border border-stone-200 rounded-sm px-2 py-1"
-          />
+            class="border border-stone-200 rounded-sm px-2 py-1" />
           <label for="create-name">name</label>
           <input
             id="create-name"
             name="create-name"
             placeholder="Masukkan username"
-            class="border border-stone-200 rounded-sm px-2 py-1"
-          />
+            class="border border-stone-200 rounded-sm px-2 py-1" />
           <button
             id="btnSubmit"
-            class="bg-blue-600 text-white px-2 py-1 rounded-sm hover:bg-blue-800 hover:cursor-pointer"
-          >
+            class="bg-blue-600 text-white px-2 py-1 rounded-sm hover:bg-blue-800 hover:cursor-pointer">
             add
           </button>
         </div>
@@ -93,19 +79,55 @@
     </div>
 
     <div
-      class="bg-stone-950/30 w-screen h-screen top-0 z-90 fixed flex justify-center  items-center"
-      id="loader"
-    >
+      class="bg-stone-950/30 w-screen h-screen top-0 z-90 fixed flex justify-center items-center"
+      id="loader">
       <span class="loader"></span>
     </div>
 
-    <div class="p-2 bg-white z-10"><div id="calendarEl"></div></div>
+    <div
+      id="guest-search-wrap"
+      class="hidden bg-white p-2 border-b border-stone-200">
+      <div class="flex justify-between items-end gap-2">
+        <div class="">
+          <label for="guest-search" class="text-sm text-stone-700"
+            >Cari user</label
+          >
+          <input
+            id="guest-search"
+            type="search"
+            placeholder="Cari "
+            class="w-full border border-stone-200 rounded-sm px-2 py-1 mt-1" />
+        </div>
+        <button
+          id="clear-filter-btn"
+          type="button"
+          class="shrink-0 text-sm text-white hover:cursor-pointer bg-stone-800 px-2 py-1 rounded-2xl">
+          Clear filter
+        </button>
+      </div>
+      <div
+        id="guest-search-results"
+        class="mt-2 flex flex-col gap-1 max-h-16 overflow-auto"></div>
+    </div>
+
+    <div class="p-2 bg-white z-10 relative">
+      <div
+        id="calendar-loading"
+        class="absolute inset-0 z-10 flex items-center justify-center bg-white/80 hidden">
+        <div class="flex items-center gap-2 text-sm text-stone-600">
+          <div
+            class="h-4 w-4 animate-spin rounded-full border-2 border-stone-300 border-t-blue-600"></div>
+          Geting data...
+        </div>
+      </div>
+      <div id="calendarEl"></div>
+    </div>
 
     <p class="bg-white pt-2 border-stone-200 border-b text-stone-800">
       Drag and drop cuy
     </p>
     <div id="userList" class="flex flex-wrap bg-white p-2 gap-2"></div>
-   
+
     <script src="/main.js" type="module"></script>
   </body>
 </html>

@@ -1,15 +1,44 @@
 import { db } from "../config/firebase";
-import { collection, addDoc, query, where, getDocs } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  query,
+  where,
+  getDocs,
+  runTransaction,
+  doc
+} from "firebase/firestore";
 
 export async function createUser(data) {
   try {
+    const counterRef = doc(db, "counters", "users");
+
+    const userId = await runTransaction(db, async (transaction) => {
+      const snap = await transaction.get(counterRef);
+
+      if (!snap.exists()) {
+        transaction.set(counterRef, { lastUserId: 1 });
+        return 1;
+      }
+
+      const lastUserId = snap.data().lastUserId;
+
+      transaction.update(counterRef, {
+        lastUserId: lastUserId + 1,
+      });
+
+      return lastUserId + 1;
+    });
+
     const docRef = await addDoc(collection(db, "users"), {
+      userId,
       name: data.name,
       username: data.username,
       isAdmin: false,
     });
     return {
       id: docRef.id,
+      userId,
       name: data.name,
       username: data.username,
       isAdmin: false,
@@ -28,8 +57,8 @@ export async function isAlreadyRegistered(username) {
 export async function loadUser() {
   const snapshot = await getDocs(collection(db, "users"));
 
-  return snapshot.docs.map(doc => ({
+  return snapshot.docs.map((doc) => ({
     id: doc.id,
-    ...doc.data()
+    ...doc.data(),
   }));
 }

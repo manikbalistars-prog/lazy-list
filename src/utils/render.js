@@ -9,15 +9,166 @@ import {
 } from "../services/offday";
 import { isValidUser, isAdmin } from "../services/auth";
 import { loadUser } from "../services/users";
+import { migrateUserId } from "../services/migrate_user";
 
 const calendarEl = document.getElementById("calendarEl");
 const userListEl = document.getElementById("userList");
+const guestSearchWrapEl = document.getElementById("guest-search-wrap");
+const guestSearchInputEl = document.getElementById("guest-search");
+const guestSearchResultsEl = document.getElementById("guest-search-results");
+const clearFilterBtnEl = document.getElementById("clear-filter-btn");
+const calendarLoadingEl = document.getElementById("calendar-loading");
 let isDeleting = false;
 let calendarInstance = null;
+let offdayData = [];
+let guestUsers = [];
+let selectedGuestUser = null;
+let guestSearchInitialized = false;
+
+function setCalendarLoading(isLoading) {
+  calendarLoadingEl?.classList.toggle("hidden", !isLoading);
+}
+
+function renderCalendarEvents(raw) {
+  if (!calendarInstance) return;
+
+  const filtered = selectedGuestUser
+    ? raw.filter((item) => {
+        const itemUserId = String(item.userId ?? "");
+        const candidates = [
+          String(selectedGuestUser.id ?? ""),
+          String(selectedGuestUser.userId ?? ""),
+        ];
+        const matched = candidates.some(
+          (value) => value && itemUserId === value,
+        );
+        const sameName =
+          selectedGuestUser.name &&
+          item.name &&
+          item.name.toLowerCase() === selectedGuestUser.name.toLowerCase();
+
+        return matched || sameName;
+      })
+    : raw;
+
+  const events = filtered.map((item) => ({
+    id: item.id,
+    title: item.name,
+    start: item.date,
+    allDay: item.allDay,
+    extendedProps: {
+      isHalf: item.isHalf,
+      userId: item.userId,
+    },
+  }));
+
+  calendarInstance.batchRendering(() => {
+    calendarInstance.removeAllEvents();
+    events.forEach((e) => calendarInstance.addEvent(e));
+  });
+}
+
+function renderGuestResults(query = "") {
+  if (!guestSearchResultsEl) return;
+
+  const trimmedQuery = query.trim().toLowerCase();
+  const source = ( !trimmedQuery
+    ? guestUsers
+    : guestUsers.filter((user) => {
+        const haystack = `${user.name || ""} ${user.username || ""} ${user.userId ?? ""}`.toLowerCase();
+        return haystack.includes(trimmedQuery);
+      })
+  )
+    .filter((user) => user.userId != null && user.userId !== "")
+    .slice()
+    .sort((a, b) => Number(a.userId) - Number(b.userId))
+    .slice(0, 10);
+
+  if (!source.length) {
+    guestSearchResultsEl.innerHTML = '<p class="text-sm text-stone-500">Tidak ada hasil</p>';
+    return;
+  }
+
+  guestSearchResultsEl.innerHTML = source
+    .map((user) => {
+      const isSelected = selectedGuestUser?.id === user.id;
+      return `
+        <button
+          type="button"
+          class="w-full text-left px-2 py-1 rounded-sm border border-stone-200 hover:bg-stone-100 ${isSelected ? "bg-stone-100" : ""}"
+          data-user-id="${user.id}"
+        >
+          <div class="font-medium text-sm">${user.name || "Unknown"}</div>
+         
+        </button>
+      `;
+    })
+    .join("");
+
+  guestSearchResultsEl.querySelectorAll("button").forEach((button) => {
+    button.addEventListener("click", () => {
+      const user = guestUsers.find((item) => item.id === button.dataset.userId);
+      if (!user) return;
+
+      selectedGuestUser = user;
+      guestSearchInputEl.value = user.name || user.username || "";
+      renderGuestResults(guestSearchInputEl.value);
+      renderCalendarEvents(offdayData);
+    });
+  });
+}
+
+export async function initGuestSearch() {
+  if (!guestSearchWrapEl || !guestSearchInputEl || !guestSearchResultsEl) return;
+  setCalendarLoading(true);
+
+  if (!guestSearchInitialized) {
+    guestSearchInputEl.addEventListener("input", (event) => {
+      renderGuestResults(event.target.value);
+    });
+
+    clearFilterBtnEl?.addEventListener("click", () => {
+      selectedGuestUser = null;
+      guestSearchInputEl.value = "";
+      renderGuestResults("");
+      renderCalendarEvents(offdayData);
+    });
+
+    guestSearchInitialized = true;
+  }
+
+  const rawUser = localStorage.getItem("user");
+  const isGuest = !rawUser;
+
+  guestSearchWrapEl.classList.remove("hidden");
+
+  guestUsers = await loadUser();
+  if (!guestUsers.length) {
+    guestSearchResultsEl.innerHTML = '<p class="text-sm text-stone-500">Tidak ada user</p>';
+    renderCalendarEvents(offdayData);
+    setCalendarLoading(false);
+    return;
+  }
+
+  if (isGuest) {
+    guestSearchInputEl.value = selectedGuestUser?.name || "";
+    renderGuestResults(guestSearchInputEl.value);
+    renderCalendarEvents(offdayData);
+    setCalendarLoading(false);
+    return;
+  }
+
+  guestSearchInputEl.value = "";
+  guestSearchResultsEl.innerHTML = "";
+  selectedGuestUser = null;
+  renderCalendarEvents(offdayData);
+  setCalendarLoading(false);
+}
 
 export async function initCalendar() {
   if (calendarInstance) return calendarInstance;
 
+  setCalendarLoading(true);
   const valid = await isValidUser();
 
   calendarInstance = new Calendar(calendarEl, {
@@ -48,11 +199,11 @@ export async function initCalendar() {
       let bgClass;
 
       if (isHalf) {
-        bgClass = "bg-yellow-600";
+        bgClass = "bg-blue-600";
       } else if (name === "DAY OFF") {
         bgClass = "bg-red-600";
       } else {
-        bgClass = "bg-blue-600";
+        bgClass = "bg-green-600";
       }
 
       return {
@@ -161,6 +312,7 @@ export async function initCalendar() {
   });
 
   calendarInstance.render();
+  setCalendarLoading(false);
   let unsubscribeOffDay = null;
   if (unsubscribeOffDay) {
     unsubscribeOffDay();
@@ -169,21 +321,9 @@ export async function initCalendar() {
   subscribeOffDay((raw) => {
     if (!calendarInstance) return;
 
-    const events = raw.map((item) => ({
-      id: item.id,
-      title: item.name,
-      start: item.date,
-      allDay: item.allDay,
-      extendedProps: {
-        isHalf: item.isHalf,
-        userId: item.userId,
-      },
-    }));
-
-    calendarInstance.batchRendering(() => {
-      calendarInstance.removeAllEvents();
-      events.forEach((e) => calendarInstance.addEvent(e));
-    });
+    offdayData = raw;
+    renderCalendarEvents(raw);
+    setCalendarLoading(false);
   });
 
   return calendarInstance;
@@ -196,6 +336,13 @@ export async function renderUsers() {
 
   if (admin) {
     users = await loadUser();
+    // await migrateUserId()
+
+    users.sort((a, b) => {
+      if (a.userId == null || b.userId == null) return 0;
+      return a.userId - b.userId;
+    });
+    console.log(users);
   } else {
     const raw = localStorage.getItem("user");
     if (!raw) return;
@@ -214,12 +361,12 @@ export async function renderUsers() {
     .map(
       (user) => `
     <div 
-      class="px-5 py-3 bg-blue-600 rounded-sm text-white cursor-pointer"
+      class="px-5 py-3 bg-green-600 rounded-sm text-white cursor-pointer"
       data-id="${user.id}"
-    >
+    > ${user.userId}
       ${user.name}
     </div>
-  `
+  `,
     )
     .join("");
 

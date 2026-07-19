@@ -6,7 +6,8 @@ import {
   where,
   getDocs,
   runTransaction,
-  doc
+  doc,
+  deleteDoc,
 } from "firebase/firestore";
 
 export async function createUser(data) {
@@ -61,4 +62,12 @@ export async function loadUser() {
     id: doc.id,
     ...doc.data(),
   }));
+}
+
+export async function deleteUser(userId) {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  await deleteDoc(doc(db, "users", userId));
 }

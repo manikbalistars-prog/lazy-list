@@ -1,6 +1,8 @@
 import { Calendar } from "@fullcalendar/core";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import interactionPlugin, { Draggable } from "@fullcalendar/interaction";
+import { createIcons, icons } from "lucide";
+import Swal from "sweetalert2";
 import {
   subscribeOffDay,
   createOffDay,
@@ -8,7 +10,7 @@ import {
   updateOffDay,
 } from "../services/offday";
 import { isValidUser, isAdmin } from "../services/auth";
-import { loadUser } from "../services/users";
+import { deleteUser, loadUser } from "../services/users";
 import { migrateUserId } from "../services/migrate_user";
 
 const calendarEl = document.getElementById("calendarEl");
@@ -359,16 +361,68 @@ export async function renderUsers() {
   userListEl.innerHTML = users
     .map(
       (user) => `
-    <div 
-      class="px-5 py-3 bg-green-600 rounded-sm text-white cursor-pointer"
-      data-id="${user.id}"
-      data-name="${user.name || ""}"
-    > ${user.userId}
-      ${user.name}
+    <div class="flex items-center justify-between gap-8 px-5 py-3 bg-green-600 rounded-sm text-white">
+      <div 
+        class="cursor-pointer flex-1"
+        data-id="${user.id}"
+        data-name="${user.name || ""}"
+      >
+        ${user.userId}
+        ${user.name}
+      </div>
+      ${admin ? `<button class="delete-user-btn text-stone-950 flex items-center justify-center h-8 w-8 rounded-full bg-white hover:bg-stone-600" data-user-id="${user.id}" aria-label="Delete user">
+        <i data-lucide="trash-2" class="h-4 w-4"></i>
+      </button>` : ""}
     </div>
   `,
     )
     .join("");
+
+  createIcons({ icons });
+
+  userListEl.querySelectorAll(".delete-user-btn").forEach((button) => {
+    button.addEventListener("click", async (event) => {
+      event.stopPropagation();
+      const targetUserId = button.dataset.userId;
+
+      if (!targetUserId) return;
+
+      const isAllowed = await isAdmin();
+      if (!isAllowed) return;
+
+      const userLabel = button.closest("div")?.textContent?.trim() || "user ini";
+      const confirmed = await Swal.fire({
+        title: "Hapus user?",
+        text: `Yakin ingin menghapus ${userLabel}?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, hapus",
+        cancelButtonText: "Batal",
+        confirmButtonColor: "#dc2626",
+      });
+
+      if (!confirmed.isConfirmed) return;
+
+      try {
+        await deleteUser(targetUserId);
+        await Swal.fire({
+          title: "Berhasil",
+          text: "User berhasil dihapus",
+          icon: "success",
+          timer: 1500,
+          timerProgressBar: true,
+        });
+        await renderUsers();
+      } catch (error) {
+        console.error(error);
+        Swal.fire({
+          title: "Gagal",
+          text: "Tidak bisa menghapus user",
+          icon: "error",
+        });
+      }
+    });
+  });
 
   if (!draggableInstance) {
     draggableInstance = new Draggable(userListEl, {

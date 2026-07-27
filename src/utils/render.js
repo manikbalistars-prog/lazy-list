@@ -31,6 +31,23 @@ function setCalendarLoading(isLoading) {
   calendarLoadingEl?.classList.toggle("hidden", !isLoading);
 }
 
+function formatDateISO(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function getMonthRange(date) {
+  const startDate = new Date(date.getFullYear(), date.getMonth(), 1);
+  const endDate = new Date(date.getFullYear(), date.getMonth() + 1, 1);
+
+  return {
+    start: formatDateISO(startDate),
+    end: formatDateISO(endDate),
+  };
+}
+
 function renderCalendarEvents(raw) {
   if (!calendarInstance) return;
 
@@ -315,17 +332,32 @@ export async function initCalendar() {
   calendarInstance.render();
   setCalendarLoading(false);
   let unsubscribeOffDay = null;
-  if (unsubscribeOffDay) {
-    unsubscribeOffDay();
+
+  function loadMonthEvents(date) {
+    if (!calendarInstance) return;
+    setCalendarLoading(true);
+
+    if (unsubscribeOffDay) {
+      unsubscribeOffDay();
+    }
+
+    const currentDate = date || calendarInstance.getDate();
+    const { start, end } = getMonthRange(currentDate);
+
+    unsubscribeOffDay = subscribeOffDay(start, end, (raw) => {
+      if (!calendarInstance) return;
+
+      offdayData = raw;
+      renderCalendarEvents(raw);
+      setCalendarLoading(false);
+    });
   }
 
-  subscribeOffDay((raw) => {
-    if (!calendarInstance) return;
-
-    offdayData = raw;
-    renderCalendarEvents(raw);
-    setCalendarLoading(false);
+  calendarInstance.setOption("datesSet", function (info) {
+    loadMonthEvents(info.view?.currentStart ?? info.start ?? calendarInstance.getDate());
   });
+
+  loadMonthEvents(calendarInstance.getDate());
 
   return calendarInstance;
 }

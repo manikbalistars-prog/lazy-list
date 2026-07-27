@@ -7,12 +7,22 @@ import {
   doc,
   updateDoc,
   onSnapshot,
+  query,
+  where,
+  orderBy,
 } from "firebase/firestore";
 
 import { validateUser } from "./auth";
 
-export function subscribeOffDay(callback) {
-  return onSnapshot(collection(db, "data"), (snapshot) => {
+export function subscribeOffDay(startDate, endDate, callback) {
+  const q = query(
+    collection(db, "data"),
+    where("date", ">=", startDate),
+    where("date", "<", endDate),
+    orderBy("date"),
+  );
+
+  return onSnapshot(q, (snapshot) => {
     const data = snapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),

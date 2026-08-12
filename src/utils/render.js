@@ -53,21 +53,21 @@ function renderCalendarEvents(raw) {
 
   const filtered = selectedGuestUser
     ? raw.filter((item) => {
-        const itemUserId = String(item.userId ?? "");
-        const candidates = [
-          String(selectedGuestUser.id ?? ""),
-          String(selectedGuestUser.userId ?? ""),
-        ];
-        const matched = candidates.some(
-          (value) => value && itemUserId === value,
-        );
-        const sameName =
-          selectedGuestUser.name &&
-          item.name &&
-          item.name.toLowerCase() === selectedGuestUser.name.toLowerCase();
+      const itemUserId = String(item.userId ?? "");
+      const candidates = [
+        String(selectedGuestUser.id ?? ""),
+        String(selectedGuestUser.userId ?? ""),
+      ];
+      const matched = candidates.some(
+        (value) => value && itemUserId === value,
+      );
+      const sameName =
+        selectedGuestUser.name &&
+        item.name &&
+        item.name.toLowerCase() === selectedGuestUser.name.toLowerCase();
 
-        return matched || sameName;
-      })
+      return matched || sameName;
+    })
     : raw;
 
   const events = filtered.map((item) => ({
@@ -91,12 +91,12 @@ function renderGuestResults(query = "") {
   if (!guestSearchResultsEl) return;
 
   const trimmedQuery = query.trim().toLowerCase();
-  const source = ( !trimmedQuery
+  const source = (!trimmedQuery
     ? guestUsers
     : guestUsers.filter((user) => {
-        const haystack = `${user.name || ""} ${user.username || ""} ${user.userId ?? ""}`.toLowerCase();
-        return haystack.includes(trimmedQuery);
-      })
+      const haystack = `${user.name || ""} ${user.username || ""} ${user.userId ?? ""}`.toLowerCase();
+      return haystack.includes(trimmedQuery);
+    })
   )
     .filter((user) => user.userId != null && user.userId !== "")
     .slice()
@@ -221,6 +221,8 @@ export async function initCalendar() {
         bgClass = "bg-yellow-600";
       } else if (name === "DAY OFF") {
         bgClass = "bg-red-600";
+      } else if (name === "event") {
+        bgClass = "bg-blue-600";
       } else {
         bgClass = "bg-green-600";
       }
